@@ -10,20 +10,23 @@ const ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
 
 export const REVENUECAT_ENTITLEMENT_IDENTIFIER = 'premium';
 
-function getApiKey(): string {
+function getApiKey(): string | null {
   const isPreview = __DEV__ || Platform.OS === 'web' || Constants.executionEnvironment === 'storeClient';
   const apiKey = isPreview ? TEST_API_KEY : Platform.OS === 'ios' ? IOS_API_KEY : ANDROID_API_KEY;
-  if (!apiKey) throw new Error('RevenueCat is not configured for this platform.');
-  return apiKey;
+  return apiKey ?? null;
 }
 
 let initialized = false;
+let configured = false;
 
 export function initializeRevenueCat(): void {
   if (initialized) return;
-  Purchases.setLogLevel(__DEV__ ? LOG_LEVEL.DEBUG : LOG_LEVEL.WARN);
-  Purchases.configure({ apiKey: getApiKey() });
   initialized = true;
+  const apiKey = getApiKey();
+  if (!apiKey) return;
+  Purchases.setLogLevel(__DEV__ ? LOG_LEVEL.DEBUG : LOG_LEVEL.WARN);
+  Purchases.configure({ apiKey });
+  configured = true;
 }
 
 function useSubscriptionContext() {
@@ -32,11 +35,13 @@ function useSubscriptionContext() {
     queryKey: ['revenuecat', 'customer-info'],
     queryFn: () => Purchases.getCustomerInfo(),
     staleTime: 60_000,
+    enabled: configured,
   });
   const offeringsQuery = useQuery({
     queryKey: ['revenuecat', 'offerings'],
     queryFn: () => Purchases.getOfferings(),
     staleTime: 300_000,
+    enabled: configured,
   });
   const purchaseMutation = useMutation({
     mutationFn: async (packageToPurchase: PurchasesPackage) => {
@@ -58,8 +63,8 @@ function useSubscriptionContext() {
     customerInfo: customerInfoQuery.data,
     offerings: offeringsQuery.data,
     isSubscribed: customerInfoQuery.data?.entitlements.active[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined,
-    isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading,
-    error: customerInfoQuery.error ?? offeringsQuery.error,
+    isLoading: configured && (customerInfoQuery.isLoading || offeringsQuery.isLoading),
+    error: configured ? customerInfoQuery.error ?? offeringsQuery.error : null,
     purchase: purchaseMutation.mutateAsync,
     restore: restoreMutation.mutateAsync,
     isPurchasing: purchaseMutation.isPending,
