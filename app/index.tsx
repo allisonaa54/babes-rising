@@ -18,10 +18,10 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { PurchasesPackage } from 'react-native-purchases';
+import type { PurchasesPackage } from '@/lib/storekit';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { useColors } from '@/hooks/useColors';
-import { useSubscription } from '@/lib/revenuecat';
+import { PREMIUM_PRODUCT_IDS, useSubscription } from '@/lib/storekit';
 import { useAnalyzeDatingProfile, type DatingProfileAnalysis } from '@/lib/api-client';
 
 type Screen = 'home' | 'categories' | 'assessment' | 'results' | 'journal' | 'entry' | 'premium' | 'profile-reader' | 'dating-tracker' | 'dating-file';
@@ -846,13 +846,8 @@ export default function RedFlagHome() {
   }
 
   if (screen === 'premium') {
-    const planOrder = ['$rc_monthly', '$rc_annual', '$rc_lifetime'];
-    const freeTrialLabel = (item: PurchasesPackage) => {
-      const intro = item.product.introPrice;
-      if (!intro || intro.price !== 0) return null;
-      const unit = intro.periodUnit.toLowerCase();
-      return `${intro.periodNumberOfUnits}-${unit} free trial`;
-    };
+    const planOrder: string[] = [PREMIUM_PRODUCT_IDS.monthly, PREMIUM_PRODUCT_IDS.yearly, PREMIUM_PRODUCT_IDS.lifetime];
+    const freeTrialLabel = (item: PurchasesPackage) => item.identifier === PREMIUM_PRODUCT_IDS.yearly ? '7-day free trial' : null;
     const packages = subscription.offerings?.current?.availablePackages
       .filter((item) => planOrder.includes(item.identifier))
       .sort((a, b) => planOrder.indexOf(a.identifier) - planOrder.indexOf(b.identifier)) ?? [];
@@ -891,8 +886,8 @@ export default function RedFlagHome() {
           </LinearGradient>
           <View style={styles.planList}>
             {subscription.isLoading ? <ActivityIndicator color={colors.primary} /> : packages.map((item) => {
-              const yearly = item.identifier === '$rc_annual';
-              const lifetime = item.identifier === '$rc_lifetime';
+              const yearly = item.identifier === PREMIUM_PRODUCT_IDS.yearly;
+              const lifetime = item.identifier === PREMIUM_PRODUCT_IDS.lifetime;
               const trial = freeTrialLabel(item);
               return (
               <Pressable key={item.identifier} onPress={() => { setPurchaseMessage(null); setPendingPurchase(item); }} style={({ pressed }) => [styles.planCard, yearly && styles.planCardFeatured, pressed && styles.pressed]}>
@@ -908,12 +903,12 @@ export default function RedFlagHome() {
           </View>
           {pendingPurchase ? (
             <View style={styles.purchaseConfirmCard}>
-              <Text style={styles.purchaseConfirmTitle}>Confirm {pendingPurchase.identifier === '$rc_annual' ? 'yearly' : pendingPurchase.identifier === '$rc_lifetime' ? 'lifetime' : 'monthly'} Premium</Text>
-              <Text style={styles.purchaseConfirmText}>{pendingPurchase.identifier === '$rc_lifetime'
+              <Text style={styles.purchaseConfirmTitle}>Confirm {pendingPurchase.identifier === PREMIUM_PRODUCT_IDS.yearly ? 'yearly' : pendingPurchase.identifier === PREMIUM_PRODUCT_IDS.lifetime ? 'lifetime' : 'monthly'} Premium</Text>
+              <Text style={styles.purchaseConfirmText}>{pendingPurchase.identifier === PREMIUM_PRODUCT_IDS.lifetime
                 ? `You’ll purchase permanent Babes Rising Premium access for ${pendingPurchase.product.priceString} as a one-time purchase.`
                 : freeTrialLabel(pendingPurchase)
-                  ? `Start your ${freeTrialLabel(pendingPurchase)}. After the trial, Babes Rising Premium renews for ${pendingPurchase.product.priceString} per ${pendingPurchase.identifier === '$rc_annual' ? 'year' : 'month'} unless canceled.`
-                  : `You’ll purchase Babes Rising Premium for ${pendingPurchase.product.priceString} per ${pendingPurchase.identifier === '$rc_annual' ? 'year' : 'month'}. Your App Store account manages renewal and cancellation.`}</Text>
+                  ? `Start your ${freeTrialLabel(pendingPurchase)}. After the trial, Babes Rising Premium renews for ${pendingPurchase.product.priceString} per ${pendingPurchase.identifier === PREMIUM_PRODUCT_IDS.yearly ? 'year' : 'month'} unless canceled.`
+                  : `You’ll purchase Babes Rising Premium for ${pendingPurchase.product.priceString} per ${pendingPurchase.identifier === PREMIUM_PRODUCT_IDS.yearly ? 'year' : 'month'}. Your App Store account manages renewal and cancellation.`}</Text>
               <View style={styles.purchaseConfirmActions}>
                 <Pressable disabled={subscription.isPurchasing} onPress={() => setPendingPurchase(null)} style={styles.deleteCancelButton}><Text style={styles.deleteCancelButtonText}>Cancel</Text></Pressable>
                 <Pressable disabled={subscription.isPurchasing} onPress={() => void confirmPurchase()} style={styles.purchaseConfirmButton}>

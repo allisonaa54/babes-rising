@@ -14,12 +14,12 @@ import {
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { setBaseUrl } from '@/lib/api-client';
-import { initializeRevenueCat, SubscriptionProvider } from '@/lib/revenuecat';
+import { initializeStoreKit, SubscriptionProvider } from '@/lib/storekit';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 setBaseUrl(process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : null);
-initializeRevenueCat();
+initializeStoreKit();
 
 const queryClient = new QueryClient();
 

@@ -1,7 +1,7 @@
 {
   "name": "babes-rising",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -24,6 +24,7 @@
     "expo-font": "~57.0.1",
     "expo-glass-effect": "~57.0.2",
     "expo-haptics": "~57.0.1",
+    "expo-iap": "5.5.1",
     "expo-image": "~57.0.1",
     "expo-image-picker": "~57.0.5",
     "expo-linear-gradient": "~57.0.1",
@@ -40,7 +41,6 @@
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
     "react-native-keyboard-controller": "1.21.9",
-    "react-native-purchases": "^10.9.0",
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
