@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Babes Rising",
+    "description": "See the pattern. Trust yourself. Know your worth. Rise.",
+    "slug": "babesrise",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon-bright-pink-square-flag.png",
+    "scheme": "babesrise",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Babes Rising can use Face ID to help protect your private journal."
+      },
+      "bundleIdentifier": "com.babesrise.app"
+    },
+    "android": {
+      "package": "com.babesrise.app"
+    },
+    "web": {
+      "favicon": "./assets/images/icon-bright-pink-square-flag.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
